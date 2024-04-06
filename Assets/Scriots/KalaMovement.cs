@@ -8,40 +8,30 @@ public class KalaMovement : MonoBehaviour
     private float speed = 6f;
     private float jumpingPower = 16f;
     private bool isFacingRight = true;
-
-    private float jumpCD = 0f;
-    private float jumpLastTime = 0f;
+    private float defaultGravityScale; // To store the default gravity scale
 
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private Transform groundCheck;
     [SerializeField] private LayerMask groundLayer;
 
+    void Start()
+    {
+        defaultGravityScale = rb.gravityScale; // Store the default gravity scale
+    }
+
     void Update()
     {
-        horizontal = Input.GetAxisRaw("Horizontal" );
+        horizontal = Input.GetAxisRaw("Horizontal");
 
-        if ((Input.GetButtonDown("Jump") || Input.GetKeyDown(KeyCode.W))   && IsGrounded() && (jumpLastTime>=jumpCD)) 
+        if ((Input.GetButtonDown("Jump") || Input.GetKeyDown(KeyCode.W)) && IsGrounded())
         {
-            // Debug.Log("Jump Detected");
-            jumpLastTime = 0f;
             rb.velocity = new Vector2(rb.velocity.x, jumpingPower);
         }
 
-        // if(!IsGrounded()){
-        //     Debug.Log("In Air");
-        // }
-
-        if ((Input.GetButtonUp("Jump") || Input.GetKeyUp(KeyCode.W))&& rb.velocity.y > 0f)
+        if ((Input.GetButtonUp("Jump") || Input.GetKeyUp(KeyCode.W)) && rb.velocity.y > 0f)
         {
             rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
-            
         }
-        
-        if(IsGrounded()){
-            jumpLastTime+=Time.deltaTime;
-        }
-
-        
 
         Flip();
     }
@@ -49,22 +39,40 @@ public class KalaMovement : MonoBehaviour
     private void FixedUpdate()
     {
         rb.velocity = new Vector2(horizontal * speed, rb.velocity.y);
+
+        // Check if the player is on a slope and not moving horizontally
+        if (IsOnSlope() && Mathf.Approximately(horizontal, 0))
+        {
+            rb.gravityScale = 0; // Remove gravity effect to prevent sliding
+        }
+        else
+        {
+            rb.gravityScale = defaultGravityScale; // Reset to default gravity
+        }
     }
-    
 
     private bool IsGrounded()
-    {   
-        // Debug.Log("isgroundcheck");
-        // Debug.Log(groundCheck.position);
-        // Debug.Log(groundLayer);
+    {
         return Physics2D.OverlapCircle(groundCheck.position, 0.2f, groundLayer);
+    }
+
+    private bool IsOnSlope()
+    {
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(groundCheck.position, 0.2f, groundLayer);
+        foreach (Collider2D collider in colliders)
+        {
+            if (collider.gameObject.CompareTag("Slope"))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void Flip()
     {
         if (isFacingRight && horizontal < 0f || !isFacingRight && horizontal > 0f)
         {
-            // Debug.Log("Move Detected");
             isFacingRight = !isFacingRight;
             Vector3 localScale = transform.localScale;
             localScale.x *= -1f;

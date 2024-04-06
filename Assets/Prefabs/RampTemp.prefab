@@ -11,9 +11,9 @@ GameObject:
   - component: {fileID: 2726504192844582818}
   - component: {fileID: 4677582753803224150}
   - component: {fileID: 6433390109578025709}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: RampTemp
-  m_TagString: Untagged
+  m_TagString: Slope
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
