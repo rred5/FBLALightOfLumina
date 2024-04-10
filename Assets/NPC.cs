@@ -1,61 +1,93 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 public class NPC : MonoBehaviour
 {
-    public GameObject indicator; // Assign this in the Inspector
+    public GameObject dialoguePanel;
+    public TextMeshProUGUI dialogueText;
+    public string[] dialogue;
+    private int index = 0;
 
-    public Dialogue dialogue; // Assign your Dialogue component in the Inspector
-    private GameObject player; // To store a reference to the player GameObject
-    private bool isPlayerInRange = false;
+    public float wordSpeed;
+    public bool playerIsClose;
 
-    private void Start()
+
+    void Start()
     {
-        if (indicator != null)
-            indicator.SetActive(false);
-
-        player = GameObject.FindGameObjectWithTag("Player");
+        dialogueText.text = "";
     }
 
-    private void Update()
+    // Update is called once per frame
+    void Update()
     {
-        if (player != null)
+        if (Input.GetKeyDown(KeyCode.E) && playerIsClose)
         {
-            FlipTowardsPlayer();
-            
-            if (isPlayerInRange && Input.GetKeyDown(KeyCode.I) && !dialogue.IsTyping)
-{
-    dialogue.ActivateDialogue(transform); // Pass the NPC's transform
-}
+            if (!dialoguePanel.activeInHierarchy)
+            {
+                dialoguePanel.SetActive(true);
+                StartCoroutine(Typing());
+            }
+            else if (dialogueText.text == dialogue[index])
+            {
+                NextLine();
+            }
+
+        }
+        if (Input.GetKeyDown(KeyCode.Q) && dialoguePanel.activeInHierarchy)
+        {
+            RemoveText();
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    public void RemoveText()
     {
-        if (collision.gameObject.CompareTag("Player"))
+        dialogueText.text = "";
+        index = 0;
+        dialoguePanel.SetActive(false);
+    }
+
+    IEnumerator Typing()
+    {
+        foreach(char letter in dialogue[index].ToCharArray())
         {
-            if (indicator != null)
-                indicator.SetActive(true);
-            
-            isPlayerInRange = true;
+            dialogueText.text += letter;
+            yield return new WaitForSeconds(wordSpeed);
         }
     }
 
-    private void OnTriggerExit2D(Collider2D collision)
+    public void NextLine()
     {
-        if (collision.gameObject.CompareTag("Player"))
+        if (index < dialogue.Length - 1)
         {
-            if (indicator != null)
-                indicator.SetActive(false);
-
-            isPlayerInRange = false;
+            index++;
+            dialogueText.text = "";
+            StartCoroutine(Typing());
+        }
+        else
+        {
+            RemoveText();
         }
     }
 
-    void FlipTowardsPlayer()
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        bool playerIsOnLeft = player.transform.position.x < transform.position.x;
-        Vector3 localScale = transform.localScale;
-        localScale.x = playerIsOnLeft ? -Mathf.Abs(localScale.x) : Mathf.Abs(localScale.x);
-        transform.localScale = localScale;
+        if (other.CompareTag("Player"))
+        {
+            playerIsClose = true;
+            Debug.Log("close");
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            playerIsClose = false;
+            Debug.Log("Far");
+            RemoveText();
+        }
     }
 }
