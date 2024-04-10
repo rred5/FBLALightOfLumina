@@ -9,59 +9,98 @@ public class Dialogue : MonoBehaviour
     public TextMeshProUGUI textComponent;
     public string[] lines;
     public float textSpeed;
-    public RectTransform dialogueRectTransform;
-    public Vector3 dialogueOffset;
-    public float hideDistance = 5f; // Distance at which the dialogue box will be hidden
+    public Vector3 dialogueOffset = new Vector3(0, 2, 0); // Adjust this value as needed
 
-    private GameObject player;
-    private Transform npcTransform; // NPC's Transform
+    private Transform npcTransform;
+    private Canvas dialogueCanvas;
     private int index;
+    private bool isTyping = false;
 
-    private void Start()
+
+    private void Awake()
     {
-        player = GameObject.FindGameObjectWithTag("Player");
-        gameObject.SetActive(false); // Initially hide the dialogue box
+        // Ensure the dialogue box is initially disabled to avoid showing up unwantedly
+        gameObject.SetActive(false);
     }
+
+    public bool IsTyping
+{
+    get { return isTyping; }
+}
+
+     private void Start()
+    {
+        dialogueCanvas = GetComponentInParent<Canvas>(); // Assuming this script is attached to the Canvas GameObject
+        dialogueCanvas.enabled = false; // Hide the dialogue canvas initially
+    }   
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && npcTransform != null)
         {
-            if (textComponent.text == lines[index])
+            if (!isTyping)
             {
                 NextLine();
             }
             else
             {
+                // Complete the typing instantly
                 StopAllCoroutines();
                 textComponent.text = lines[index];
+                isTyping = false;
             }
         }
 
-        // Check the distance between the player and the NPC
-        if (npcTransform != null && player != null)
-        {
-            float distance = Vector3.Distance(player.transform.position, npcTransform.position);
-            if (distance > hideDistance)
-            {
-                // Hide the dialogue box if the player is out of range
-                gameObject.SetActive(false);
-            }
-        }
-    }
+       
 
-    public void ActivateDialogue(Vector3 npcPosition, Transform npcTransform)
+        // Update the dialogue box's position if it's active and the NPC transform is set
+        // if (gameObpublic void ActivateDialogue(Transform npcTransform)
     {
-        this.npcTransform = npcTransform; // Store the NPC's Transform
-        textComponent.text = string.Empty;
-        gameObject.SetActive(true); // Make sure the dialogue UI is enabled
-        PositionDialogueBox(npcPosition + dialogueOffset);
+        this.npcTransform = npcTransform;
+        index = 0; // Reset the index for the new dialogue
+        dialogueCanvas.enabled = true; // Show the dialogue canvas
         StartDialogue();
     }
+            // Position the dialogue box above the NPC with the given offset
+            transform.position = npcTransform.position + dialogueOffset;
+        }
+
+       
+
+
+    
+
+    
+
+    // public void ActivateDialogue(Transform npcTransform)
+    // {
+    //     // Ensure the dialogue box is active before starting the coroutine
+    //     gameObject.SetActive(true);
+
+    //     this.npcTransform = npcTransform;
+    //     index = 0; // Reset index to show the first line
+    //     StartDialogue();
+    // }
+
+
+            public void ActivateDialogue(Transform npcTransform)
+{
+    this.npcTransform = npcTransform;
+    index = 0; // Reset the index for the new dialogue
+    
+    // Ensure gameObject is active before enabling the canvas and starting dialogue
+    gameObject.SetActive(true);
+    dialogueCanvas.enabled = true; // Show the dialogue canvas
+    
+    StartDialogue();
+}
+
 
     void StartDialogue()
     {
-        index = 0;
+        gameObject.SetActive(true);
+        textComponent.text = string.Empty;
+        isTyping = true;
         StartCoroutine(TypeLine());
     }
 
@@ -72,6 +111,7 @@ public class Dialogue : MonoBehaviour
             textComponent.text += c;
             yield return new WaitForSeconds(textSpeed);
         }
+        isTyping = false;
     }
 
     void NextLine()
@@ -79,18 +119,22 @@ public class Dialogue : MonoBehaviour
         if (index < lines.Length - 1)
         {
             index++;
-            textComponent.text = string.Empty;
+            textComponent.text = string.Empty; // Clear the text for the next line
+            isTyping = true;
             StartCoroutine(TypeLine());
         }
         else
         {
-            gameObject.SetActive(false);
+            gameObject.SetActive(false); // Hide the dialogue box after the last line
+            textComponent.text = string.Empty; // Clear text for the next interaction
         }
     }
 
     void PositionDialogueBox(Vector3 npcPosition)
-    {
-        Vector2 screenPoint = Camera.main.WorldToScreenPoint(npcPosition);
-        dialogueRectTransform.position = screenPoint;
-    }
+{
+    Vector3 worldPosition = npcPosition + dialogueOffset; // Apply the offset in world space
+    Vector2 screenPoint = Camera.main.WorldToScreenPoint(worldPosition);
+    // dialogueRectTransform.position = screenPoint;
+}
+
 }
