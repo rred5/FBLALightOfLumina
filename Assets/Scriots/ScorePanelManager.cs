@@ -13,10 +13,18 @@ public class ScorePanelManager : MonoBehaviour
 
     public GameObject ScorePanelObj;
 
+    public GameObject GameOverPanel;
+
+    public TextMeshProUGUI scoreGui;
+
+    public TextMeshProUGUI winnerCheck;
     void initScoreUpdate(){
         UIManager.Instance.setEssenceScoreText(essencePanelText);
          UIManager.Instance.setTimeScoreText(timePanelText);
           UIManager.Instance.setScorePanel(ScorePanelObj);
+        UIManager.Instance.setGameOverPanel(GameOverPanel);
+        UIManager.Instance.setStateWin(winnerCheck);
+        UIManager.Instance.setTotalScore(scoreGui);
     }
 
 
@@ -26,9 +34,11 @@ public class ScorePanelManager : MonoBehaviour
     }
 
     // Update is called once per frame
-
-    // void Update()
-    // {
-        
-    // }
+    void Update()
+    {
+    if(!UIManager.Instance.getGameDone()){
+        GameManager.Instance.AddTimeScore(GameManager.Instance.getTimeScore());
+    }
+    }
+    
 }

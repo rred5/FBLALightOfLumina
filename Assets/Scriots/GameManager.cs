@@ -7,10 +7,13 @@ using TMPro;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
+    public float levelStartTime;
 
     public int Score { get; private set; }
 
     public int EssenceScore { get; private set; }
+
+    public int TimeScore { get; private set; }
     public int Lives { get; private set; }
 
     // Consider storing level data and scores in a more complex structure or database for actual leaderboards
@@ -18,7 +21,25 @@ public class GameManager : MonoBehaviour
     
     void Update(){
         HandleGlobalInputs();
+
+    float timeElapsed = Time.timeSinceLevelLoad - levelStartTime;
+    TimeScore = Mathf.FloorToInt(timeElapsed); // Converts time to an integer score
+
+    // Optionally, update the UI with the new score
+    // UIManager.Instance.UpdateTimeUI(TimeScore);
+
+        
     }
+
+    public int getTimeScore(){
+        return TimeScore;
+    }
+
+    public void AddTimeScore(int amount)
+{
+    TimeScore += amount;
+    UIManager.Instance.UpdateTimeUI(TimeScore); // Assuming you have a method to update the time score UI
+}
 
     private void HandleGlobalInputs()
     {
@@ -47,10 +68,14 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-
+        levelStartTime = Time.timeSinceLevelLoad;
         // Initialize the game state
-        ResetGame();
+        
     }
+
+    // void Start(){
+    //     ResetGame();    
+    // }
 
     public void AddEssenceScore(int amount)
     {
@@ -76,11 +101,20 @@ public class GameManager : MonoBehaviour
     //     }
     // }
 
-    public void RestartLevel()
-    {
-        // Reset score and lives if needed
-        // Load the current level again
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    public void RestartLevel(){
+        ResetGame();
+         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+         
+    }
+
+    public float calculateScore(){
+        if((EssenceScore*100-TimeScore)<=0){
+           return 0; 
+        }
+
+        else{
+            return EssenceScore*100-TimeScore;
+        }
     }
 
     public void LoadNextLevel()
@@ -121,8 +155,12 @@ public class GameManager : MonoBehaviour
 
     private void ResetGame()
     {
-        Score = 0;
-        Lives = 3; // Or whatever the starting lives should be
+        EssenceScore = 0; 
+        TimeScore = 0;
+        
+        UIManager.Instance.UpdateEssenceCount(EssenceScore);
+        UIManager.Instance.UpdateTimeUI(TimeScore);
+        // Or whatever the starting lives should be
         // Update UI for score and lives
         // UIManager.Instance.UpdateScoreUI(Score);
         // UIManager.Instance.UpdateLivesUI(Lives);

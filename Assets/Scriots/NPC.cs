@@ -14,6 +14,8 @@ public class NPC : MonoBehaviour
     public float wordSpeed;
     public bool playerIsClose;
 
+    // public TextMeshProUGUI contButton;
+
 
 
     private GameObject player;
@@ -53,6 +55,7 @@ public class NPC : MonoBehaviour
             
             else if (dialogueText.text == dialogue[index])
             {
+                // contButton.SetActive(true);
                 NextLine();
             }
 

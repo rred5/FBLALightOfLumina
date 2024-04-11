@@ -21,8 +21,8 @@ public class CanvasManagerLevel : MonoBehaviour
         if((!scorePanelRef.activeInHierarchy)&&UIManager.Instance.checkInitializeUIElements()){
             scorePanelRef.SetActive(true);
         }
-        else{
-            Debug.Log("Requirement not met");
-        }
+        // else{
+        //     Debug.Log("Requirement not met");
+        // }
     }
 }

@@ -5,10 +5,17 @@ using UnityEngine.SceneManagement;
 
 public class MainMenu : MonoBehaviour
 {
-   public void playGame(){
+   public void playGame1(){
     UIManager.Instance.initalizeUIElements(true);
-    Debug.Log("initialize input true");
+    // Debug.Log("initialize input true");
     SceneManager.LoadScene(1);
+    
+   }
+
+   public void playGame2(){
+    UIManager.Instance.initalizeUIElements(true);
+    // Debug.Log("initialize input true");
+    SceneManager.LoadScene(2);
     
    }
 
