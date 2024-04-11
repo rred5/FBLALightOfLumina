@@ -6,7 +6,10 @@ using UnityEngine.SceneManagement;
 public class MainMenu : MonoBehaviour
 {
    public void playGame(){
+    UIManager.Instance.initalizeUIElements(true);
+    Debug.Log("initialize input true");
     SceneManager.LoadScene(1);
+    
    }
 
    public void openSettingsMenu(){
@@ -15,6 +18,10 @@ public class MainMenu : MonoBehaviour
 
    public void openMainMenu(){
     SceneManager.LoadScene("MainMenu");
+   }
+
+   public void openLevelSelect(){
+    SceneManager.LoadScene("LevelSelect");
    }
    public void quitGame(){
     #if UNITY_STANDALONE
